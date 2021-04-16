@@ -2,15 +2,16 @@
 /*! 
     @file     potar-to-day-month
     @author   Martin CORNU
-	@date	  15/04/21
+	  @date	    15/04/21
 
-This program read an analog value from a potentiometer and map it to dd/mm date.
+This program read an analog value from two potentiometers and them to dd/mm date.
 */
 /**************************************************************************/
 
-#define DEBUG
+ #define DEBUG
 
-int potPin = 2;    // select the input pin for the potentiometer
+#define POTAR_DAY_PIN (uint8_t) 2    // select the input pin for the potentiometer controlling the days
+#define POTAR_MONTH_PIN (uint8_t) 3    // select the input pin for the potentiometer controlling the months
 
 void setup() {
 #ifdef DEBUG
@@ -19,40 +20,20 @@ void setup() {
 }
 
 void loop() {
-  uint16_t potar = 1;
-  uint16_t potarLast = 0;
+  uint16_t potDay = 0;
+  uint8_t day = 0;
 
-  uint16_t potarAvg = 1;
-  uint16_t potarAvgLast = 0;
+  uint16_t potMonth = 0;
+  uint8_t month = 0;
   
-  uint8_t day = 1;
-  uint8_t dayLast = 0;
+  potDay = analogRead(POTAR_DAY_PIN); 
+  potMonth = analogRead(POTAR_MONTH_PIN);
   
-  uint8_t month = 1;
-  
-  potar = analogRead(potPin) + 1; // add 1 to avoid 0
-  
-  // debounce potar
-  float alpha = 1; // factor to tune
-  potarAvg = alpha * potar + (1-alpha) * potarAvgLast;
-  
-  day = (map(potarAvg, 1, 1024, 1, 384)) % 32; // map analog value to 12 * 32 days (32 because of % -> one 0 value per month)
-
-  if ((day < dayLast) && (potarAvg > potarAvgLast)) {
-    month++;
-  } else if((day > dayLast) && (potarAvg < potarAvgLast)) {
-    month--;
-  }
-
-  potarLast = potar;
-  potarAvgLast = potarAvg;
-  dayLast = day;
+  day = map(potDay, 0, 1023, 1, 31); // map analog value to 31 days
+  month = map(potMonth, 0, 1023, 1, 12); // map analog value to 12 months
   
   #ifdef DEBUG
-	  if ((day > 0) && (day < 32) && (month > 0) && (month < 13)) {
-	   Serial.print(day, DEC);Serial.print(" / ");Serial.println(month, DEC); 
-	  }
+	  Serial.print(day, DEC);Serial.print(" / ");Serial.println(month, DEC);
+    delay(250);
   #endif
-  
-  delay(250);
 }

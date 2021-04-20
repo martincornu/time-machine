@@ -6,33 +6,43 @@
 
 This program read an analog value from two potentiometers and them to dd/mm date.
 Then it display it to 4 large digits from sparkfun.
+A second arduino is use for the year. It set SUCCESS_YEAR_PIN to LOW if this is the right year.
+If date ddmmyyyy is right, then it activates an output (relay) and display random numbers on digits.
 */
 /**************************************************************************/
 
- #define DEBUG
+#define DEBUG
 
-#define POTAR_DAY_PIN   (uint8_t)2    // select the input pin for the potentiometer controlling the days
-#define POTAR_MONTH_PIN (uint8_t)3    // select the input pin for the potentiometer controlling the months
-#define DIGITS_NUMBER   (uint8_t)4
+#define DIGITS_NUMBER     (uint8_t)4
 
-//segment GPIO declarations
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-byte segmentClock = 6;
-byte segmentLatch = 5;
-byte segmentData = 7;
+#define POTAR_DAY_PIN     (uint8_t)A2    // potar days
+#define POTAR_MONTH_PIN   (uint8_t)A3    // potar months
+#define SUCCESS_YEAR_PIN  (uint8_t)3     // LOW if year is the right one on the other arduino
+
+#define DIGIT_CLK_PIN     (uint8_t)6
+#define DIGIT_LAT_PIN     (uint8_t)5
+#define DIGIT_SER_PIN     (uint8_t)7
+
+#define RELAY_PIN         (uint8_t)2
+
+#define SUCCESS_DATE_DDMM (uint16_t)907  //day and month success date as ddmm format
 
 void setup() {
 #ifdef DEBUG
   Serial.begin(9600);
 #endif
 
-  pinMode(segmentClock, OUTPUT);
-  pinMode(segmentData, OUTPUT);
-  pinMode(segmentLatch, OUTPUT);
+  pinMode(DIGIT_CLK_PIN, OUTPUT);
+  pinMode(DIGIT_SER_PIN, OUTPUT);
+  pinMode(DIGIT_LAT_PIN, OUTPUT);
+  digitalWrite(DIGIT_CLK_PIN, LOW);
+  digitalWrite(DIGIT_SER_PIN, LOW);
+  digitalWrite(DIGIT_LAT_PIN, LOW);
+  
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);
 
-  digitalWrite(segmentClock, LOW);
-  digitalWrite(segmentData, LOW);
-  digitalWrite(segmentLatch, LOW);
+  pinMode(SUCCESS_YEAR_PIN, INPUT_PULLUP);
 }
 
 int number = 0;
@@ -45,6 +55,8 @@ void loop() {
   uint8_t month = 0;
 
   uint16_t dd_mm = 0; // final number to display as dd/mm
+
+  uint8_t count_down = SUCCESS_DATE_DDMM; // count down when success
   
   potDay = analogRead(POTAR_DAY_PIN); 
   potMonth = analogRead(POTAR_MONTH_PIN);
@@ -58,6 +70,19 @@ void loop() {
 
   dd_mm = (day * 100) + month;
   showNumber(dd_mm);
+
+  if( (digitalRead(SUCCESS_YEAR_PIN) == LOW) && (dd_mm == SUCCESS_DATE_DDMM) ) {
+    #ifdef DEBUG
+      Serial.println("success!");
+    #endif
+    digitalWrite(RELAY_PIN, HIGH);
+
+    while(1)
+    {
+        showNumber(random(0, 9999));      
+        delay(250);
+    };
+  }
   
   delay(250);
 }
@@ -77,8 +102,8 @@ void showNumber(float value)
   }
 
   //Latch the current segment data
-  digitalWrite(segmentLatch, LOW);
-  digitalWrite(segmentLatch, HIGH); //Register moves storage register on the rising edge of RCK
+  digitalWrite(DIGIT_LAT_PIN, LOW);
+  digitalWrite(DIGIT_LAT_PIN, HIGH); //Register moves storage register on the rising edge of RCK
 }
 
 //Given a number, or '-', shifts it out to the display
@@ -123,8 +148,8 @@ void postNumber(byte number, boolean decimal)
   //Clock these bits out to the drivers
   for (byte x = 0 ; x < 8 ; x++)
   {
-    digitalWrite(segmentClock, LOW);
-    digitalWrite(segmentData, segments & 1 << (7 - x));
-    digitalWrite(segmentClock, HIGH); //Data transfers to the register on the rising edge of SRCK
+    digitalWrite(DIGIT_CLK_PIN, LOW);
+    digitalWrite(DIGIT_SER_PIN, segments & 1 << (7 - x));
+    digitalWrite(DIGIT_CLK_PIN, HIGH); //Data transfers to the register on the rising edge of SRCK
   }
 }

@@ -1,31 +1,29 @@
 /**************************************************************************/
 /*! 
-    @file     potar-to-digits-ddmm
+    @file     potar-to-digits-yyyy
     @author   Martin CORNU
-    @date     16/04/21
+    @date     22/04/21
 
-This program read an analog value from two potentiometers and them to dd/mm date.
+This program read an analog value from a potentiometer and map it to a yyyy year.
 Then it display it to 4 large digits from sparkfun.
-A second arduino is use for the year. It set SUCCESS_YEAR_PIN to LOW if this is the right year.
-If date ddmmyyyy is right, then it activates an output (relay) and display random numbers on digits.
+A second arduino is use for the day and month ddmm.
+If year is right, then it activates an output (success signal for second arduino) 
+and display random numbers on digits.
 */
 /**************************************************************************/
 
 #define DEBUG
 
-#define DIGITS_NUMBER     (uint8_t)4
+#define DIGITS_NUMBER       (uint8_t)4
 
-#define POTAR_DAY_PIN     (uint8_t)A2    // potar days
-#define POTAR_MONTH_PIN   (uint8_t)A3    // potar months
-#define SUCCESS_YEAR_PIN  (uint8_t)3     // LOW if year is the right one on the other arduino
+#define POTAR_YEAR_PIN      (uint8_t)A2    // potar year
+#define SUCCESS_YEAR_PIN    (uint8_t)3     // LOW if year is the right one
 
 #define DIGIT_CLK_PIN     (uint8_t)6
 #define DIGIT_LAT_PIN     (uint8_t)5
 #define DIGIT_SER_PIN     (uint8_t)7
 
-#define RELAY_PIN         (uint8_t)2 
-
-#define SUCCESS_DATE_DDMM (uint16_t)907  //day and month success date as ddmm format
+#define SUCCESS_YEAR_YYYY (uint16_t)1997  // year success as yyyy format
 
 void setup() {
 #ifdef DEBUG
@@ -38,40 +36,30 @@ void setup() {
   digitalWrite(DIGIT_CLK_PIN, LOW);
   digitalWrite(DIGIT_SER_PIN, LOW);
   digitalWrite(DIGIT_LAT_PIN, LOW);
-  
-  pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, LOW);
 
-  pinMode(SUCCESS_YEAR_PIN, INPUT_PULLUP);
+  pinMode(SUCCESS_YEAR_PIN, OUTPUT);
+  digitalWrite(SUCCESS_YEAR_PIN, HIGH);
 }
 
 void loop() {
-  uint16_t potDay = 0;
-  uint8_t day = 0;
-
-  uint16_t potMonth = 0;
-  uint8_t month = 0;
-
-  uint16_t dd_mm = 0; // final number to display as dd/mm
+  uint16_t potYear = 0;
+  uint8_t year = 0;
   
-  potDay = analogRead(POTAR_DAY_PIN); 
-  potMonth = analogRead(POTAR_MONTH_PIN);
+  potYear = analogRead(POTAR_YEAR_PIN); 
   
-  day = map(potDay, 0, 1023, 1, 31); // map analog value to 31 days
-  month = map(potMonth, 0, 1023, 1, 12); // map analog value to 12 months
+  year = map(potYear, 0, 1023, 1900, 2100); // map analog value to years
   
   #ifdef DEBUG
-    Serial.print(day, DEC);Serial.print(" / ");Serial.println(month, DEC);
+    Serial.print(year, DEC);
   #endif
 
-  dd_mm = (day * 100) + month;
-  showNumber(dd_mm);
+  showNumber(year);
 
-  if( (digitalRead(SUCCESS_YEAR_PIN) == LOW) && (dd_mm == SUCCESS_DATE_DDMM) ) {
+  if(year == SUCCESS_YEAR_YYYY) {
     #ifdef DEBUG
       Serial.println("success!");
     #endif
-    digitalWrite(RELAY_PIN, HIGH);
+    digitalWrite(SUCCESS_YEAR_PIN, LOW);
 
     while(1)
     {

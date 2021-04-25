@@ -2,7 +2,7 @@
 /*! 
     @file     potar-to-digits-yyyy
     @author   Martin CORNU
-    @date     22/04/21
+    @date     22/04/21 
 
 This program read an analog value from a potentiometer and map it to a yyyy year.
 Then it display it to 4 large digits from sparkfun.
@@ -18,6 +18,7 @@ and display random numbers on digits.
 
 #define POTAR_YEAR_PIN      (uint8_t)A2    // potar year
 #define SUCCESS_YEAR_PIN    (uint8_t)3     // LOW if year is the right one
+#define SUCCESS_DDMM_PIN    (uint8_t)2     // LOW if ddmm is the right one on the other arduino
 
 #define DIGIT_CLK_PIN     (uint8_t)6
 #define DIGIT_LAT_PIN     (uint8_t)5
@@ -37,17 +38,19 @@ void setup() {
   digitalWrite(DIGIT_SER_PIN, LOW);
   digitalWrite(DIGIT_LAT_PIN, LOW);
 
+  pinMode(SUCCESS_DDMM_PIN, INPUT_PULLUP);
+
   pinMode(SUCCESS_YEAR_PIN, OUTPUT);
-  digitalWrite(SUCCESS_YEAR_PIN, HIGH);
+  digitalWrite(SUCCESS_YEAR_PIN, HIGH);   /* active low */
 }
 
 void loop() {
   uint16_t potYear = 0;
-  uint8_t year = 0;
+  uint16_t year = 0;
   
   potYear = analogRead(POTAR_YEAR_PIN); 
   
-  year = map(potYear, 0, 1023, 1900, 2100); // map analog value to years
+  year = map(potYear, 0, 1023, 1950, 2050); // map analog value to years
   
   #ifdef DEBUG
     Serial.print(year, DEC);
@@ -55,7 +58,7 @@ void loop() {
 
   showNumber(year);
 
-  if(year == SUCCESS_YEAR_YYYY) {
+  if( (digitalRead(SUCCESS_DDMM_PIN) == LOW) && (year == SUCCESS_YEAR_YYYY) ) {
     #ifdef DEBUG
       Serial.println("success!");
     #endif

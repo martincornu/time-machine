@@ -18,7 +18,8 @@ If date ddmmyyyy is right, then it activates an output (relay) and display rando
 #define POTAR_DAY_PIN     (uint8_t)A2    // potar days
 #define POTAR_MONTH_PIN   (uint8_t)A3    // potar months
 #define SUCCESS_YEAR_PIN  (uint8_t)3     // LOW if year is the right one on the other arduino
-#define SUCCESS_DDMM_PIN  (uint8_t)2     // LOW if ddmm is the right one
+#define SUCCESS_DDMM_PIN  (uint8_t)4
+// LOW if ddmm is the right one
 
 #define DIGIT_CLK_PIN     (uint8_t)6
 #define DIGIT_LAT_PIN     (uint8_t)5
@@ -71,18 +72,25 @@ void loop() {
   dd_mm = (day * 100) + month;
   showNumber(dd_mm);
 
-  if( (digitalRead(SUCCESS_YEAR_PIN) == LOW) && (dd_mm == SUCCESS_DATE_DDMM) ) {
+  if(dd_mm == SUCCESS_DATE_DDMM) {
+    digitalWrite(SUCCESS_DDMM_PIN, LOW);
+  #ifdef DEBUG
+    Serial.println("ddmm good!");
+  #endif
+    
+    if (digitalRead(SUCCESS_YEAR_PIN) == LOW) {
     #ifdef DEBUG
       Serial.println("success!");
     #endif
-    digitalWrite(RELAY_PIN, HIGH);
-    digitalWrite(SUCCESS_DDMM_PIN, LOW);
-
-    while(1)
-    {
-        showNumber(random(0, 9999));      
-        delay(250);
-    };
+      digitalWrite(RELAY_PIN, HIGH);
+      while(1)
+      {
+          showNumber(random(0, 9999));      
+          delay(250);
+      };
+    }
+  } else {
+    digitalWrite(SUCCESS_DDMM_PIN, HIGH);
   }
   
   delay(250);

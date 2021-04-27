@@ -18,7 +18,7 @@ and display random numbers on digits.
 
 #define POTAR_YEAR_PIN      (uint8_t)A2    // potar year
 #define SUCCESS_YEAR_PIN    (uint8_t)3     // LOW if year is the right one
-#define SUCCESS_DDMM_PIN    (uint8_t)2     // LOW if ddmm is the right one on the other arduino
+#define SUCCESS_DDMM_PIN    (uint8_t)8     // LOW if ddmm is the right one on the other arduino
 
 #define DIGIT_CLK_PIN     (uint8_t)6
 #define DIGIT_LAT_PIN     (uint8_t)5
@@ -58,17 +58,24 @@ void loop() {
 
   showNumber(year);
 
-  if( (digitalRead(SUCCESS_DDMM_PIN) == LOW) && (year == SUCCESS_YEAR_YYYY) ) {
-    #ifdef DEBUG
-      Serial.println("success!");
-    #endif
+  if(year == SUCCESS_YEAR_YYYY) {
     digitalWrite(SUCCESS_YEAR_PIN, LOW);
-
-    while(1)
-    {
-        showNumber(random(0, 9999));      
-        delay(250);
-    };
+  #ifdef DEBUG
+    Serial.println("year good!");
+  #endif
+   
+    if(digitalRead(SUCCESS_DDMM_PIN) == LOW) {
+      #ifdef DEBUG
+        Serial.println("success!");
+      #endif
+      while(1)
+      {
+          showNumber(random(0, 9999));      
+          delay(250);
+      };
+    }
+  } else {
+    digitalWrite(SUCCESS_YEAR_PIN, HIGH);
   }
   
   delay(250);

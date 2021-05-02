@@ -1,6 +1,10 @@
 # time-machine
 ## Time machine arduino for escape room
 
+![date](hw/date.jpg)
+
+## Firmware
+
 - **potar-to-digits-ddmm.ino**
 
 This program read an analog value from two potentiometers and map them to dd/mm date.

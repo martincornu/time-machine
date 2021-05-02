@@ -24,7 +24,7 @@ and display random numbers on digits.
 #define DIGIT_LAT_PIN     (uint8_t)5
 #define DIGIT_SER_PIN     (uint8_t)7
 
-#define SUCCESS_YEAR_YYYY (uint16_t)1997  // year success as yyyy format
+#define SUCCESS_YEAR_YYYY (uint16_t)1999  // year success as yyyy format
 
 void setup() {
 #ifdef DEBUG

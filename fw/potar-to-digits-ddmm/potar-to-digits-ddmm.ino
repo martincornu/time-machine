@@ -27,7 +27,7 @@ If date ddmmyyyy is right, then it activates an output (relay) and display rando
 
 #define RELAY_PIN         (uint8_t)2 
 
-#define SUCCESS_DATE_DDMM (uint16_t)907  //day and month success date as ddmm format
+#define SUCCESS_DATE_DDMM (uint16_t)2112  //day and month success date as ddmm format
 
 void setup() {
 #ifdef DEBUG

@@ -24,6 +24,8 @@ and display random numbers on digits.
 #define DIGIT_LAT_PIN     (uint8_t)5
 #define DIGIT_SER_PIN     (uint8_t)7
 
+#define BTN_PIN           (uint8_t)2
+
 #define SUCCESS_YEAR_YYYY (uint16_t)1999  // year success as yyyy format
 
 void setup() {
@@ -39,6 +41,7 @@ void setup() {
   digitalWrite(DIGIT_LAT_PIN, LOW);
 
   pinMode(SUCCESS_DDMM_PIN, INPUT_PULLUP);
+  pinMode(BTN_PIN, INPUT_PULLUP);
 
   pinMode(SUCCESS_YEAR_PIN, OUTPUT);
   digitalWrite(SUCCESS_YEAR_PIN, HIGH);   /* active low */
@@ -59,12 +62,12 @@ void loop() {
   showNumber(year);
 
   if(year == SUCCESS_YEAR_YYYY) {
-    digitalWrite(SUCCESS_YEAR_PIN, LOW);
   #ifdef DEBUG
     Serial.println("year good!");
   #endif
    
-    if(digitalRead(SUCCESS_DDMM_PIN) == LOW) {
+    if((digitalRead(SUCCESS_DDMM_PIN) == LOW) && ((digitalRead(BTN_PIN) == LOW))) {
+      digitalWrite(SUCCESS_YEAR_PIN, LOW);
       #ifdef DEBUG
         Serial.println("success!");
       #endif

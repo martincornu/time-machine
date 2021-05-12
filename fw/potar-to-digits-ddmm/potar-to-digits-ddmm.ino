@@ -78,7 +78,7 @@ void loop() {
     Serial.println("ddmm good!");
   #endif
     
-    if (digitalRead(SUCCESS_YEAR_PIN) == LOW) {
+    if ((digitalRead(SUCCESS_YEAR_PIN) == LOW)) {
     #ifdef DEBUG
       Serial.println("success!");
     #endif
@@ -86,7 +86,7 @@ void loop() {
       while(1)
       {
           showNumber(random(0, 9999));      
-          delay(250);
+          delay(250); 
       };
     }
   } else {

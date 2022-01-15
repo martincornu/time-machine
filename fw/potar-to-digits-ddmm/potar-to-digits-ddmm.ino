@@ -13,6 +13,10 @@ If date ddmmyyyy is right, then it activates an output (relay) and display rando
 
 #define DEBUG
 
+#define DELAY_REACTIVATE_EM (uint8_t)15 // delay before reactivate EM in s
+
+#define GENERIC_DELAY_MS (uint16_t)250 // generic delay in ms
+
 #define DIGITS_NUMBER     (uint8_t)4
 
 #define POTAR_DAY_PIN     (uint8_t)A2    // potar days
@@ -58,6 +62,8 @@ void loop() {
   uint8_t month = 0;
 
   uint16_t dd_mm = 0; // final number to display as dd/mm
+
+  uint32_t l_u32TimerMs = 0;
   
   potDay = analogRead(POTAR_DAY_PIN); 
   potMonth = analogRead(POTAR_MONTH_PIN);
@@ -82,18 +88,33 @@ void loop() {
     #ifdef DEBUG
       Serial.println("success!");
     #endif
+
+      // EM off
       digitalWrite(RELAY_PIN, HIGH);
+      
+      // time machine go crazy for DELAY_REACTIVATE_EM s with EM off
+      while(l_u32TimerMs < (DELAY_REACTIVATE_EM * 1000))
+      {
+          showNumber(random(0, 9999));      
+          delay(GENERIC_DELAY_MS);
+          l_u32TimerMs += GENERIC_DELAY_MS;
+      };
+
+      // EM back on
+      digitalWrite(RELAY_PIN, LOW);
+
+      // time machine go crazy for infinite
       while(1)
       {
           showNumber(random(0, 9999));      
-          delay(250);
+          delay(GENERIC_DELAY_MS);
       };
     }
   } else {
     digitalWrite(SUCCESS_DDMM_PIN, HIGH);
   }
   
-  delay(250);
+  delay(GENERIC_DELAY_MS);
 }
 
 //Takes a number and displays 4 numbers. Displays absolute value (no negatives)

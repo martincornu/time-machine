@@ -13,7 +13,7 @@ If date ddmmyyyy is right, then it activates an output (relay) and display rando
 
 #define DEBUG
 
-#define DELAY_REACTIVATE_EM (uint8_t)15 // delay before reactivate EM in s
+#define DELAY_REACTIVATE_EM (uint8_t)30 // delay before reactivate EM in s
 
 #define GENERIC_DELAY_MS (uint16_t)250 // generic delay in ms
 
@@ -22,12 +22,12 @@ If date ddmmyyyy is right, then it activates an output (relay) and display rando
 #define POTAR_DAY_PIN     (uint8_t)A2    // potar days
 #define POTAR_MONTH_PIN   (uint8_t)A3    // potar months
 #define SUCCESS_YEAR_PIN  (uint8_t)3     // LOW if year is the right one on the other arduino
-#define SUCCESS_DDMM_PIN  (uint8_t)4
-// LOW if ddmm is the right one
-
-#define DIGIT_CLK_PIN     (uint8_t)6
+#define SUCCESS_DDMM_PIN  (uint8_t)4     // LOW if ddmm is the right one
 #define DIGIT_LAT_PIN     (uint8_t)5
+#define DIGIT_CLK_PIN     (uint8_t)6
 #define DIGIT_SER_PIN     (uint8_t)7
+#define GREEN_LED_PIN     (uint8_t)8
+#define RED_LED_PIN       (uint8_t)9
 
 #define RELAY_PIN         (uint8_t)2 
 
@@ -47,6 +47,11 @@ void setup() {
   
   pinMode(RELAY_PIN, OUTPUT);
   digitalWrite(RELAY_PIN, LOW);
+
+  pinMode(GREEN_LED_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+  digitalWrite(GREEN_LED_PIN, LOW);
+  digitalWrite(RED_LED_PIN, HIGH);
 
   pinMode(SUCCESS_YEAR_PIN, INPUT_PULLUP);
   
@@ -89,7 +94,9 @@ void loop() {
       Serial.println("success!");
     #endif
 
-      // EM off
+      // EM off, green led on
+      digitalWrite(GREEN_LED_PIN, HIGH);
+      digitalWrite(RED_LED_PIN, LOW);
       digitalWrite(RELAY_PIN, HIGH);
       
       // time machine go crazy for DELAY_REACTIVATE_EM s with EM off
@@ -100,7 +107,9 @@ void loop() {
           l_u32TimerMs += GENERIC_DELAY_MS;
       };
 
-      // EM back on
+      // EM back on, red led on
+      digitalWrite(GREEN_LED_PIN, LOW);
+      digitalWrite(RED_LED_PIN, HIGH);
       digitalWrite(RELAY_PIN, LOW);
 
       // time machine go crazy for infinite
